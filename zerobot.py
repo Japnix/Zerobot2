@@ -4,6 +4,8 @@ import urllib.request
 import json
 import datetime
 import sys
+import random
+
 
 discordtoken = sys.argv[1]
 stocktoken = sys.argv[2]
@@ -57,5 +59,18 @@ async def stock(ctx, *, query):
             await ctx.channel.send(embed=embed)
     except:
         return
+
+@bot.command()
+async def roll(ctx, dice: str):
+    """Rolls a dice in NdN format."""
+    try:
+        rolls, limit = map(int, dice.split('d'))
+    except Exception:
+        await ctx.send('Format has to be in NdN!')
+        return
+
+    result = ', '.join(str(random.randint(1, limit)) for r in range(rolls))
+    await ctx.channel.send(result)
+
 
 bot.run(discordtoken)
