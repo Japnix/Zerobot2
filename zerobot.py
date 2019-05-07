@@ -22,7 +22,7 @@ async def on_ready():
     print('------')
 
 @bot.command()
-async def announcement(ctx, *, announcement):
+async def announcement(ctx, *, msg):
 
     channel = None
 
@@ -33,7 +33,7 @@ async def announcement(ctx, *, announcement):
     if channel is None:
         await ctx.channel.send('There is no text channel #announcements in this guild')
     else:
-        await channel.send(ctx.author.display_name + ': ' + announcement)
+        await channel.send(ctx.author.display_name + ': ' + msg)
 
 
 @bot.command()
