@@ -12,7 +12,7 @@ description = '''An example bot to showcase the discord.ext.commands extension
 module.
 
 There are a number of utility commands being showcased here.'''
-bot = commands.Bot(command_prefix='z?', description=description)
+bot = commands.Bot(command_prefix='!', description=description)
 
 @bot.event
 async def on_ready():
