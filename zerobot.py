@@ -23,8 +23,6 @@ async def on_ready():
 
 @bot.command()
 async def announcement(ctx, *, msg):
-    print(ctx.guild.text_channels)
-
     channel = None
 
     for x in ctx.guild.text_channels:
