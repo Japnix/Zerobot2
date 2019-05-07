@@ -22,18 +22,18 @@ async def on_ready():
     print('------')
 
 @bot.command()
-async def announce(ctx, *, announcement):
+async def announcement(ctx, *, announcement):
 
-   channel = None
+    channel = None
 
-   for x in ctx.guild._channels:
-       if bot.get_channel(x).name == 'announcements':
-           channel = bot.get_channel(x)
+    for x in ctx.guild._channels:
+        if bot.get_channel(x).name == 'announcements' and bot.get_channel(x)._type == 0:
+            channel = bot.get_channel(x)
 
-   if channel is None:
-       await ctx.channel.send('There is no #announcements channel in this guild')
-   else:
-       await channel.send(ctx.author.display_name + ': ' + announcement)
+    if channel is None:
+        await ctx.channel.send('There is no text channel #announcements in this guild')
+    else:
+        await channel.send(ctx.author.display_name + ': ' + announcement)
 
 
 @bot.command()
