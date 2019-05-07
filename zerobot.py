@@ -27,11 +27,11 @@ async def announce(ctx, *, announcement):
    channel = None
 
    for x in ctx.guild._channels:
-       if bot.get_channel(x).name == 'announcement' or bot.get_channel(x).name == 'announcements':
+       if bot.get_channel(x).name == 'announcements':
            channel = bot.get_channel(x)
 
    if channel is None:
-       await ctx.channel.send('There is no #announcement channel in this guild')
+       await ctx.channel.send('There is no #announcements channel in this guild')
    else:
        await channel.send(ctx.author.display_name + ': ' + announcement)
 
