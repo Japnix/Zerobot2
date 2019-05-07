@@ -38,7 +38,7 @@ async def announcement(ctx, *, msg):
 
 @bot.command()
 async def stock(ctx, *, query):
-    request_url = 'https://cloud.iexapis.com/stable/tops?token=' + stocktoken + '&symbols=' + query
+    request_url = 'https://cloud.iexapis.com/stable/tops/last?token=' + stocktoken + '&symbols=' + query
     embed = discord.Embed(title='Stock Queries',
                           timestamp=datetime.datetime.utcnow())
 
@@ -50,11 +50,11 @@ async def stock(ctx, *, query):
         if len(data) == 0:
             await ctx.channel.send(embed=discord.Embed(title="No Stock Matches"))
         elif len(data) == 1:
-            embed.add_field(name=data[0]['symbol'], value=data[0]['lastSalePrice'])
+            embed.add_field(name=data[0]['symbol'], value=data[0]['price'])
             await ctx.channel.send(embed=embed)
         else:
             for tickers in data:
-                embed.add_field(name=tickers['symbol'], value=tickers['lastSalePrice'])
+                embed.add_field(name=tickers['symbol'], value=tickers['price'])
             await ctx.channel.send(embed=embed)
     except:
         return
