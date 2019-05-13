@@ -1,6 +1,7 @@
 import discord
 from discord.ext import commands
 import urllib.request
+import urllib.parse
 import json
 import datetime
 import sys
@@ -9,6 +10,7 @@ import random
 
 discordtoken = sys.argv[1]
 stocktoken = sys.argv[2]
+embedcolor = 0xed330e
 
 description = '''An example bot to showcase the discord.ext.commands extension
 module.
@@ -39,9 +41,12 @@ async def announcement(ctx, *, msg):
 
 @bot.command()
 async def stock(ctx, *, query):
-    request_url = 'https://cloud.iexapis.com/stable/tops/last?token=' + stocktoken + '&symbols=' + query
+    request_url = 'https://cloud.iexapis.com/stable/tops/last?token=' + stocktoken\
+                  + '&symbols=' + urllib.parse.quote(query)
+
     embed = discord.Embed(title='Stock Queries',
-                          timestamp=datetime.datetime.utcnow())
+                          timestamp=datetime.datetime.utcnow(),
+                          color=embedcolor)
 
     try:
         data = urllib.request.urlopen(request_url)
@@ -49,7 +54,9 @@ async def stock(ctx, *, query):
         data = json.loads(content)
 
         if len(data) == 0:
-            await ctx.channel.send(embed=discord.Embed(title="No Stock Matches", timestamp=datetime.datetime.utcnow()))
+            await ctx.channel.send(embed=discord.Embed(title="No Stock Matches",
+                                                       timestamp=datetime.datetime.utcnow(),
+                                                       color=embedcolor))
         elif len(data) == 1:
             embed.add_field(name=data[0]['symbol'], value=data[0]['price'])
             await ctx.channel.send(embed=embed)
