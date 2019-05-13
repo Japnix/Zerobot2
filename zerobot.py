@@ -76,7 +76,11 @@ async def roll(ctx, dice: str):
         await ctx.send('Format has to be in NdN!')
         return
 
-    result = ', '.join(str(random.randint(1, limit)) for r in range(rolls))
+    if 1 <= int(rolls) <= 20 and 2 <= int(limit) <= 100:
+        result = ', '.join(str(random.randint(1, limit)) for r in range(rolls))
+    else:
+        result = 'Outside of range.  Limit 20 rolls of D100 or less.'
+
     await ctx.channel.send(result)
 
 
