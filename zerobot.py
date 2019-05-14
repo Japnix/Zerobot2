@@ -35,7 +35,7 @@ async def announcement(ctx, *, msg):
             channel = x
 
     if channel is None:
-        msg = ('There is no text channel #announcements in this guild')
+        msg = 'There is no text channel #announcements in this guild'
     else:
         msg = ctx.author.display_name + ': ' + msg
 
