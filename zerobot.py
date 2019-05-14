@@ -25,6 +25,7 @@ async def on_ready():
     print(bot.user.id)
     print('------')
 
+
 @bot.command()
 async def announcement(ctx, *, msg):
     channel = None
@@ -34,9 +35,11 @@ async def announcement(ctx, *, msg):
             channel = x
 
     if channel is None:
-        await ctx.channel.send('There is no text channel #announcements in this guild')
+        msg = ('There is no text channel #announcements in this guild')
     else:
-        await channel.send(ctx.author.display_name + ': ' + msg)
+        msg = ctx.author.display_name + ': ' + msg
+
+    await ctx.channel.send(msg)
 
 
 @bot.command()
@@ -67,6 +70,7 @@ async def stock(ctx, *, query):
         return
     finally:
         await ctx.channel.send(embed=embed)
+
 
 @bot.command()
 async def roll(ctx, dice: str):
