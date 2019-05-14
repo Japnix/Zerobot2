@@ -69,7 +69,9 @@ async def stock(ctx, *, query):
                 embed.add_field(name=tickers['symbol'], value=tickers['price'])
 
     except:
-        return
+        embed = discord.Embed(title="Issue with stock API",
+                              timestamp=datetime.datetime.utcnow(),
+                              color=embedcolor)
 
     finally:
         await ctx.channel.send(embed=embed)
