@@ -54,18 +54,19 @@ async def stock(ctx, *, query):
         data = json.loads(content)
 
         if len(data) == 0:
-            await ctx.channel.send(embed=discord.Embed(title="No Stock Matches",
-                                                       timestamp=datetime.datetime.utcnow(),
-                                                       color=embedcolor))
+            embed = discord.Embed(title="No Stock Matches",
+                                  timestamp=datetime.datetime.utcnow(),
+                                  color=embedcolor)
+
         elif len(data) == 1:
             embed.add_field(name=data[0]['symbol'], value=data[0]['price'])
-            await ctx.channel.send(embed=embed)
         else:
             for tickers in data:
                 embed.add_field(name=tickers['symbol'], value=tickers['price'])
-            await ctx.channel.send(embed=embed)
     except:
         return
+    finally:
+        await ctx.channel.send(embed=embed)
 
 @bot.command()
 async def roll(ctx, dice: str):
