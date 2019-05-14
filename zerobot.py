@@ -63,26 +63,33 @@ async def stock(ctx, *, query):
 
         elif len(data) == 1:
             embed.add_field(name=data[0]['symbol'], value=data[0]['price'])
+
         else:
             for tickers in data:
                 embed.add_field(name=tickers['symbol'], value=tickers['price'])
+
     except:
         return
+
     finally:
         await ctx.channel.send(embed=embed)
 
 
 @bot.command()
 async def roll(ctx, dice: str):
+
     """Rolls a dice in NdN format."""
+
     try:
         rolls, limit = map(int, dice.split('d'))
+
     except Exception:
         await ctx.send('Format has to be in NdN!')
         return
 
     if 1 <= int(rolls) <= 20 and 2 <= int(limit) <= 100:
         result = ', '.join(str(random.randint(1, limit)) for r in range(rolls))
+
     else:
         result = 'Outside of range.  Limit 20 rolls of D100 or less.'
 
