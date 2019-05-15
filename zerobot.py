@@ -39,7 +39,7 @@ async def announcement(ctx, *, msg):
     else:
         msg = ctx.author.display_name + ': ' + msg
 
-    await ctx.channel.send(msg)
+    await channel.send(msg)
 
 
 @bot.command()
