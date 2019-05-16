@@ -123,7 +123,6 @@ async def roll(ctx, dice: str):
 
 @bot.command()
 async def prefix(ctx, prefix):
-    print(settingsjson)
     with open(settingsjson, 'r') as myfile:
         myjson = json.load(myfile)
 
