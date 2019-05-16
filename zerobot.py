@@ -6,7 +6,14 @@ import json
 import datetime
 import sys
 import random
+import os
 
+
+async def get_pre(bot, message):
+    with open(os.getcwd() + "/settings.json", 'r') as x:
+        myfile = json.loads(x.read())
+
+    return myfile[str(message.guild.id)]['prefix']
 
 discordtoken = sys.argv[1]
 stocktoken = sys.argv[2]
@@ -16,7 +23,8 @@ description = '''An example bot to showcase the discord.ext.commands extension
 module.
 
 There are a number of utility commands being showcased here.'''
-bot = commands.Bot(command_prefix='!', description=description)
+bot = commands.Bot(command_prefix=get_pre, description=description)
+
 
 @bot.event
 async def on_ready():
@@ -24,6 +32,19 @@ async def on_ready():
     print(bot.user.name)
     print(bot.user.id)
     print('------')
+
+    if os.path.isfile(os.getcwd() + "/settings.json"):
+        with open(os.getcwd() + "/settings.json", 'r') as myfile:
+            myfile = json.loads(myfile.read())
+
+    else:
+        myfile = open(os.getcwd() + '/settings.json', 'w+')
+        settings = {}
+        for x in bot.guilds:
+            settings[str(x.id)] = {'prefix': '?'}
+
+        json.dump(settings, myfile)
+        myfile.close()
 
 
 @bot.command()
