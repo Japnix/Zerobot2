@@ -18,6 +18,7 @@ async def get_pre(bot, message):
 discordtoken = sys.argv[1]
 stocktoken = sys.argv[2]
 embedcolor = 0xed330e
+settingsjson = os.path.dirname(__file__) + "/settings.json"
 
 description = '''An example bot to showcase the discord.ext.commands extension
 module.
@@ -119,6 +120,21 @@ async def roll(ctx, dice: str):
         result = 'Outside of range.  Limit 20 rolls of D100 or less.'
 
     await ctx.channel.send(result)
+
+@bot.command()
+async def prefix(ctx, prefix):
+    print(settingsjson)
+    with open(settingsjson, 'r') as myfile:
+        myjson = json.load(myfile)
+
+    if ctx.message.author.id == ctx.guild.owner.id:
+        myjson[str(ctx.guild.id)]['prefix'] = prefix
+
+        with open(settingsjson, 'w+') as myfile:
+            json.dump(myjson, myfile)
+
+    else:
+        await ctx.channel.send('You are not the guild owner')
 
 
 bot.run(discordtoken)
