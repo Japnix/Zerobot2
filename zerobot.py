@@ -47,7 +47,7 @@ async def on_ready():
             myjson[str(x.id)] = {'prefix': '!'}
 
         json.dump(myjson, myfile)
-        myfile.close(myjson, myfile)
+        myfile.close(myfile)
 
 @bot.event
 async def on_guild_join(ctx):
