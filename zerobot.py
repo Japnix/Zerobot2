@@ -59,6 +59,15 @@ async def on_guild_join(ctx):
     with open(settingsjson, 'w+') as myfile:
         json.dump(myjson, myfile)
 
+@bot.event
+async def on_guild_remove(ctx):
+    with open(settingsjson, 'r') as myfile:
+        myjson = json.load(myfile)
+
+    del myjson[str(ctx.id)]
+
+    with open(settingsjson, 'w+') as myfile:
+        json.dump(myjson, myfile)
 
 @bot.command()
 async def announcement(ctx, *, msg):
