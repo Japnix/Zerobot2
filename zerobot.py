@@ -42,12 +42,22 @@ async def on_ready():
     else:
         print('creating settings.json')
         myfile = open(os.path.dirname(__file__) + '/settings.json', 'w+')
-        settings = {}
+        myjson = {}
         for x in bot.guilds:
-            settings[str(x.id)] = {'prefix': '!'}
+            myjson[str(x.id)] = {'prefix': '!'}
 
-        json.dump(settings, myfile)
-        myfile.close()
+        json.dump(myjson, myfile)
+        myfile.close(myjson, myfile)
+
+@bot.event
+async def on_guild_join(ctx):
+    with open(settingsjson, 'r') as myfile:
+        myjson = json.load(myfile)
+
+    myjson[str(ctx.id)] = {'prefix': '!'}
+
+    with open(settingsjson, 'w+') as myfile:
+        json.dump(myjson, myfile)
 
 
 @bot.command()
