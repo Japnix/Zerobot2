@@ -10,7 +10,7 @@ import os
 
 
 async def get_pre(bot, message):
-    with open(os.getcwd() + "/settings.json", 'r') as x:
+    with open(os.path.dirname(__file__) + "/settings.json", 'r') as x:
         myfile = json.loads(x.read())
 
     return myfile[str(message.guild.id)]['prefix']
@@ -33,15 +33,17 @@ async def on_ready():
     print(bot.user.id)
     print('------')
 
-    if os.path.isfile(os.getcwd() + "/settings.json"):
-        with open(os.getcwd() + "/settings.json", 'r') as myfile:
+    if os.path.isfile(os.path.dirname(__file__) + "/settings.json"):
+        print('settings.json is here')
+        with open(os.path.dirname(__file__) + "/settings.json", 'r') as myfile:
             myfile = json.loads(myfile.read())
 
     else:
-        myfile = open(os.getcwd() + '/settings.json', 'w+')
+        print('creating settings.json')
+        myfile = open(os.path.dirname(__file__) + '/settings.json', 'w+')
         settings = {}
         for x in bot.guilds:
-            settings[str(x.id)] = {'prefix': '?'}
+            settings[str(x.id)] = {'prefix': '!'}
 
         json.dump(settings, myfile)
         myfile.close()
