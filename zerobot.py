@@ -7,8 +7,14 @@ import datetime
 import sys
 import random
 import os
+import logging
 
 
+# Enable logging
+logging.basicConfig(level=logging.INFO, format='%(asctime)s:%(levelname)s:%(name)s: %(message)s')
+
+
+# Read in prefix from settings.json
 async def get_pre(bot, message):
     with open(os.path.dirname(__file__) + "/settings.json", 'r') as x:
         myfile = json.loads(x.read())
@@ -20,10 +26,8 @@ stocktoken = sys.argv[2]
 embedcolor = 0xed330e
 settingsjson = os.path.dirname(__file__) + "/settings.json"
 
-description = '''An example bot to showcase the discord.ext.commands extension
-module.
-
-There are a number of utility commands being showcased here.'''
+description = '''Marcie is a discord bot written by Japnix.  It's primary use is announcements.  But has some generic
+utility functions built in.'''
 bot = commands.Bot(command_prefix=get_pre, description=description)
 
 
@@ -32,35 +36,41 @@ async def on_ready():
     print('Logged in as')
     print(bot.user.name)
     print(bot.user.id)
+    print('Startup Time: ' + str(datetime.datetime.utcnow()))
+    print('Guilds Added: ' + str(len(bot.guilds)))
     print('------')
 
     if os.path.isfile(os.path.dirname(__file__) + "/settings.json"):
-        print('settings.json is here')
+        print('Loaded settings.json')
         with open(os.path.dirname(__file__) + "/settings.json", 'r') as myfile:
             myfile = json.loads(myfile.read())
 
     else:
-        print('creating settings.json')
+        print('Creating settings.json')
         myfile = open(os.path.dirname(__file__) + '/settings.json', 'w+')
         myjson = {}
         for x in bot.guilds:
-            myjson[str(x.id)] = {'prefix': '!'}
+            myjson[str(x.id)] = {'prefix': '?'}
 
         json.dump(myjson, myfile)
         myfile.close()
 
+
 @bot.event
 async def on_guild_join(ctx):
+    logging.info('Guild ' + ctx.name + ' added ' + ctx.me.display_name + '.')
     with open(settingsjson, 'r') as myfile:
         myjson = json.load(myfile)
 
-    myjson[str(ctx.id)] = {'prefix': '!'}
+    myjson[str(ctx.id)] = {'prefix': '?'}
 
     with open(settingsjson, 'w+') as myfile:
         json.dump(myjson, myfile)
 
+
 @bot.event
 async def on_guild_remove(ctx):
+    logging.info('Guild ' + ctx.name + ' removed ' + ctx.me.display_name + '.')
     with open(settingsjson, 'r') as myfile:
         myjson = json.load(myfile)
 
@@ -68,6 +78,13 @@ async def on_guild_remove(ctx):
 
     with open(settingsjson, 'w+') as myfile:
         json.dump(myjson, myfile)
+
+
+@bot.event
+async def on_command_error(ctx, error):
+    if isinstance(error, commands.CommandNotFound):
+        logging.info(str(error))
+
 
 @bot.command()
 async def announcement(ctx, *, msg):
@@ -142,17 +159,33 @@ async def roll(ctx, dice: str):
 
 @bot.command()
 async def prefix(ctx, prefix):
+    """This command allows guild owners or administrators to change the prefix used for commands.
+
+    The default prefix is `?` EX: ?name WOL.
+
+    Example:
+        ?prefix z!
+
+        Then...
+        z!name WOL
+    """
+
     with open(settingsjson, 'r') as myfile:
         myjson = json.load(myfile)
 
-    if ctx.message.author.id == ctx.guild.owner.id:
+    if ctx.message.author.id == ctx.guild.owner.id or ctx.message.author.guild_permissions.administrator is True:
+        logging.info(ctx.guild.name + ' (' + str(ctx.guild.id) + ') ' + 'changed prefix to ' + prefix)
         myjson[str(ctx.guild.id)]['prefix'] = prefix
+        embed = discord.Embed(title='Switched prefix to ' + str(prefix), color=embedcolor,
+                              timestamp=datetime.datetime.utcnow())
 
         with open(settingsjson, 'w+') as myfile:
             json.dump(myjson, myfile)
 
     else:
-        await ctx.channel.send('You are not the guild owner')
+        embed = discord.Embed(title='You are not the guild owner or administrator.', color=embedcolor,
+                              timestamp=datetime.datetime.utcnow())
+    await ctx.channel.send(embed=embed)
 
 
 bot.run(discordtoken)
