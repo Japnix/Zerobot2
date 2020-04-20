@@ -157,6 +157,7 @@ async def roll(ctx, dice: str):
 
     await ctx.channel.send(result)
 
+
 @bot.command()
 async def prefix(ctx, prefix):
     """This command allows guild owners or administrators to change the prefix used for commands.
@@ -186,6 +187,90 @@ async def prefix(ctx, prefix):
         embed = discord.Embed(title='You are not the guild owner or administrator.', color=embedcolor,
                               timestamp=datetime.datetime.utcnow())
     await ctx.channel.send(embed=embed)
+
+
+#@bot.command()
+#async def newrole(ctx, role_name):
+#    role_color = discord.Colour(0x00FF00)
+#
+#    await ctx.guild.create_role(name=role_name, color=role_color)
+
+
+@bot.command()
+async def register(ctx):
+    """This command assigns the message sender to the Players role to be used for online locals."""
+
+    role = discord.utils.get(ctx.guild.roles, name='Players')
+
+    if role:
+        for x in ctx.guild.roles:
+            if x.name == 'Players':
+                players_role = x
+
+        await ctx.message.author.add_roles(players_role)
+        await ctx.channel.send(f"```{ctx.message.author.display_name} has registered```")
+
+    else:
+        await ctx.channel.send("```Players Role does not exist in this guild```")
+
+@bot.command()
+async def clearplayers(ctx):
+    """This command clears all members of the Players role used for online locals"""
+
+    role = discord.utils.get(ctx.guild.roles, name='Players')
+
+    if role and ctx.message.author.guild_permissions.administrator is True:
+        for x in role.members:
+            await x.remove_roles(role)
+
+        await ctx.channel.send("```Players Role has removed all it's users```")
+
+    elif ctx.message.author.guild_permissions.administrator is False:
+        await ctx.channel.send("```You are not an administrator```")
+
+    else:
+        await ctx.channel.send("```Players Role does not exist in this guild```")
+
+
+@bot.command()
+async def unregister(ctx):
+    """This command removes the message sender to the Players role to be used for online locals."""
+
+    role = discord.utils.get(ctx.guild.roles, name='Players')
+
+    if role:
+        for x in ctx.guild.roles:
+            if x.name == 'Players':
+                players_role = x
+
+        await ctx.message.author.remove_roles(players_role)
+        await ctx.channel.send(f"```{ctx.message.author.display_name} has unregistered```")
+
+    else:
+        await ctx.channel.send("```Players Role does not exist in this guild```")
+
+
+@bot.command()
+async def players(ctx):
+    """This command lists all players currently registered for online locals"""
+
+    role = discord.utils.get(ctx.guild.roles, name='Players')
+
+    if role:
+        if role.members:
+            message = '```\n'
+            for x in role.members:
+                message += x.display_name + '\n'
+
+            message += '```'
+
+        else:
+            message = '```Nobody has registered```'
+
+        await ctx.channel.send(message)
+
+    else:
+        await ctx.channel.send("```Players Role does not exist in this guild```")
 
 
 bot.run(discordtoken)
