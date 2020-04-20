@@ -8,7 +8,15 @@ import sys
 import random
 import os
 import logging
+import yaml
 
+
+discordtoken = sys.argv[1]
+stocktoken = sys.argv[2]
+embedcolor = 0xed330e
+settingsjson = os.path.dirname(__file__) + "/settings.json"
+description = '''Zerobot is a discord bot written by Japnix.  It's primary use is announcements.  But has some generic
+utility functions built in.'''
 
 # Enable logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s:%(levelname)s:%(name)s: %(message)s')
@@ -21,13 +29,7 @@ async def get_pre(bot, message):
 
     return myfile[str(message.guild.id)]['prefix']
 
-discordtoken = sys.argv[1]
-stocktoken = sys.argv[2]
-embedcolor = 0xed330e
-settingsjson = os.path.dirname(__file__) + "/settings.json"
 
-description = '''Marcie is a discord bot written by Japnix.  It's primary use is announcements.  But has some generic
-utility functions built in.'''
 bot = commands.Bot(command_prefix=get_pre, description=description)
 
 
@@ -271,6 +273,34 @@ async def players(ctx):
 
     else:
         await ctx.channel.send("```Players Role does not exist in this guild```")
+
+
+@bot.command()
+async def prettyplayers(ctx):
+    """Same as players command, however reads from YAML which contains discord id's for regular name printing"""
+
+    with open('players.yml', 'r') as f:
+        players = yaml.safe_load(f)
+
+    role = discord.utils.get(ctx.guild.roles, name='Players')
+
+    message = '```\n'
+
+    if role:
+        if role.members:
+            for x in role.members:
+                if x.id in players.keys():
+                    message += players[x.id] + "\n"
+                else:
+                    message += x.display_name + "\n"
+
+        message += '```'
+        await ctx.channel.send(message)
+
+    else:
+        await ctx.channel.send("```Players Role does not exist in this guild```")
+
+
 
 
 bot.run(discordtoken)
