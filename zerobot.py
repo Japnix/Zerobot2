@@ -279,7 +279,7 @@ async def players(ctx):
 async def prettyplayers(ctx):
     """Same as players command, however reads from YAML which contains discord id's for regular name printing"""
 
-    with open('players.yml', 'r') as f:
+    with open(os.path.dirname(__file__) + '/players.yml', 'r') as f:
         players = yaml.safe_load(f)
 
     role = discord.utils.get(ctx.guild.roles, name='Players')
