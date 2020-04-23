@@ -294,7 +294,11 @@ async def prettyplayers(ctx):
                 else:
                     message += x.display_name + "\n"
 
-        message += '```'
+            message += '```'
+
+        else:
+            message = '```Nobody has registered```'
+
         await ctx.channel.send(message)
 
     else:
