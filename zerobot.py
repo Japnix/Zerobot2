@@ -209,12 +209,18 @@ async def register(ctx):
             if x.name == 'Players':
                 players_role = x
 
+        if ctx.guild.id == 536237827537764353 or ctx.guild.id == 235423053767639040:
+            message = f"Hey {ctx.author.display_name}! Thank you for registering. To complete your registration, please send $6 to gametheorycards@gmail.com, Sending to a Friend. In the Notes section of your transaction, please include your full name, FFTCG, and the tournament's date, formatted MM/DD/YY."
+            await ctx.author.send(message)
+
         await ctx.message.author.add_roles(players_role)
         #await ctx.channel.send(f"```{ctx.message.author.display_name} has registered```")
         await ctx.message.add_reaction('\U00002705')
 
+
     else:
         await ctx.channel.send("```Players Role does not exist in this guild```")
+
 
 @bot.command()
 async def clearplayers(ctx):
@@ -305,8 +311,6 @@ async def prettyplayers(ctx):
 
     else:
         await ctx.channel.send("```Players Role does not exist in this guild```")
-
-
 
 
 bot.run(discordtoken)
