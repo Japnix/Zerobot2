@@ -210,7 +210,8 @@ async def register(ctx):
                 players_role = x
 
         await ctx.message.author.add_roles(players_role)
-        await ctx.channel.send(f"```{ctx.message.author.display_name} has registered```")
+        #await ctx.channel.send(f"```{ctx.message.author.display_name} has registered```")
+        await ctx.message.add_reaction('\U00002705')
 
     else:
         await ctx.channel.send("```Players Role does not exist in this guild```")
@@ -246,7 +247,8 @@ async def unregister(ctx):
                 players_role = x
 
         await ctx.message.author.remove_roles(players_role)
-        await ctx.channel.send(f"```{ctx.message.author.display_name} has unregistered```")
+        #await ctx.channel.send(f"```{ctx.message.author.display_name} has unregistered```")
+        await ctx.message.add_reaction('\U00002705')
 
     else:
         await ctx.channel.send("```Players Role does not exist in this guild```")
