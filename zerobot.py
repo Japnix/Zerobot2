@@ -206,7 +206,11 @@ async def register(ctx):
 
     if role:
         if ctx.guild.id == 536237827537764353 or ctx.guild.id == 235423053767639040:
-            message = f"Hey {ctx.author.display_name}! Thank you for registering. To complete your registration, please send $6 to gametheorycards@gmail.com, Sending to a Friend. In the Notes section of your transaction, please include your full name, FFTCG, and the tournament's date, formatted MM/DD/YY."
+            message = f"Hey {ctx.author.display_name}! Thank you for registering. To complete your registration, " \
+                f"please send $6 to gametheorycards@gmail.com via PayPal, Sending to a Friend. In the Notes section " \
+                f"of your transaction, please include your full name, FFTCG, and the tournament's date, formatted " \
+                f"MM/DD/YY. Once you have paid, please respond in #online-locals-registration with `!paid` and you " \
+                f"will be marked as paid."
             await ctx.author.send(message)
 
         await ctx.message.author.add_roles(role)
