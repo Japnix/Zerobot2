@@ -297,7 +297,7 @@ async def players(ctx):
 
 
 @bot.command()
-async def prettyplayers(ctx):
+async def paidplayers(ctx):
     """Same as players command, however reads from YAML which contains discord id's for regular name printing"""
 
     with open(os.path.dirname(__file__) + '/players.yml', 'r') as f:
@@ -322,6 +322,36 @@ async def prettyplayers(ctx):
                     else:
                         message += x.display_name + "\n"
 
+
+            message += '```'
+
+        else:
+            message = '```Nobody has registered```'
+
+        await ctx.channel.send(message)
+
+    else:
+        await ctx.channel.send("```Players Role does not exist in this guild```")
+
+
+@bot.command()
+async def prettyplayers(ctx):
+    """Same as players command, however reads from YAML which contains discord id's for regular name printing"""
+
+    with open(os.path.dirname(__file__) + '/players.yml', 'r') as f:
+        players = yaml.safe_load(f)
+
+    role = discord.utils.get(ctx.guild.roles, name='Players')
+
+    message = '```\n'
+
+    if role:
+        if role.members:
+            for x in role.members:
+                if x.id in players.keys():
+                    message += players[x.id] + "\n"
+                else:
+                    message += x.display_name + "\n"
 
             message += '```'
 
