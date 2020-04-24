@@ -205,15 +205,11 @@ async def register(ctx):
     role = discord.utils.get(ctx.guild.roles, name='Players')
 
     if role:
-        for x in ctx.guild.roles:
-            if x.name == 'Players':
-                players_role = x
-
         if ctx.guild.id == 536237827537764353 or ctx.guild.id == 235423053767639040:
             message = f"Hey {ctx.author.display_name}! Thank you for registering. To complete your registration, please send $6 to gametheorycards@gmail.com, Sending to a Friend. In the Notes section of your transaction, please include your full name, FFTCG, and the tournament's date, formatted MM/DD/YY."
             await ctx.author.send(message)
 
-        await ctx.message.author.add_roles(players_role)
+        await ctx.message.author.add_roles(role)
         #await ctx.channel.send(f"```{ctx.message.author.display_name} has registered```")
         await ctx.message.add_reaction('\U00002705')
 
@@ -223,22 +219,39 @@ async def register(ctx):
 
 
 @bot.command()
+async def paid(ctx):
+    """This command assigns the message sender to the Paid role to be used for online locals."""
+
+    role = discord.utils.get(ctx.guild.roles, name='Paid')
+
+    if role:
+        await ctx.message.author.add_roles(role)
+        #await ctx.channel.send(f"```{ctx.message.author.display_name} has registered```")
+        await ctx.message.add_reaction('\U00002705')
+
+    else:
+        await ctx.channel.send("```Paid Role does not exist in this guild```")
+
+
+@bot.command()
 async def clearplayers(ctx):
     """This command clears all members of the Players role used for online locals"""
 
-    role = discord.utils.get(ctx.guild.roles, name='Players')
+    roles = [discord.utils.get(ctx.guild.roles, name='Players'),
+             discord.utils.get(ctx.guild.roles, name='Paid')]
 
-    if role and ctx.message.author.guild_permissions.administrator is True:
-        for x in role.members:
-            await x.remove_roles(role)
+    if roles and ctx.message.author.guild_permissions.administrator is True:
+        for role in roles:
+            for x in role.members:
+                await x.remove_roles(role)
 
-        await ctx.channel.send("```Players Role has removed all it's users```")
+        await ctx.channel.send("```Players + Paid roles have been emptied```")
 
     elif ctx.message.author.guild_permissions.administrator is False:
         await ctx.channel.send("```You are not an administrator```")
 
     else:
-        await ctx.channel.send("```Players Role does not exist in this guild```")
+        await ctx.channel.send("```Players + Paid roles does not exist in this guild```")
 
 
 @bot.command()
@@ -248,10 +261,6 @@ async def unregister(ctx):
     role = discord.utils.get(ctx.guild.roles, name='Players')
 
     if role:
-        for x in ctx.guild.roles:
-            if x.name == 'Players':
-                players_role = x
-
         await ctx.message.author.remove_roles(players_role)
         #await ctx.channel.send(f"```{ctx.message.author.display_name} has unregistered```")
         await ctx.message.add_reaction('\U00002705')
@@ -265,12 +274,16 @@ async def players(ctx):
     """This command lists all players currently registered for online locals"""
 
     role = discord.utils.get(ctx.guild.roles, name='Players')
+    paid_role = discord.utils.get(ctx.guild.roles, name='Paid')
 
     if role:
         if role.members:
             message = '```\n'
             for x in role.members:
-                message += x.display_name + '\n'
+                if paid_role in x.roles:
+                    message += x.display_name + ' - Paid\n'
+                else:
+                    message += x.display_name + '\n'
 
             message += '```'
 
@@ -291,16 +304,24 @@ async def prettyplayers(ctx):
         players = yaml.safe_load(f)
 
     role = discord.utils.get(ctx.guild.roles, name='Players')
-
-    message = '```\n'
+    paid_role = discord.utils.get(ctx.guild.roles, name='Paid')
 
     if role:
         if role.members:
+            message = '```\n'
             for x in role.members:
-                if x.id in players.keys():
-                    message += players[x.id] + "\n"
+                if paid_role in x.roles:
+                    if x.id in players.keys():
+                        message += players[x.id] + " - Paid\n"
+                    else:
+                        message += x.display_name + " - Paid\n"
+
                 else:
-                    message += x.display_name + "\n"
+                    if x.id in players.keys():
+                        message += players[x.id] + "\n"
+                    else:
+                        message += x.display_name + "\n"
+
 
             message += '```'
 
