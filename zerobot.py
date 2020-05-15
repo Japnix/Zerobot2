@@ -289,7 +289,7 @@ async def players(ctx):
                 else:
                     message += x.display_name + '\n'
 
-            message += '```'
+            message += f'Total: {len(role.members)}```'
 
         else:
             message = '```Nobody has registered```'
@@ -357,7 +357,7 @@ async def prettyplayers(ctx):
                 else:
                     message += x.display_name + "\n"
 
-            message += '```'
+            message += f'Total: {len(role.members)}```'
 
         else:
             message = '```Nobody has registered```'
