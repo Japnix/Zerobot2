@@ -42,7 +42,7 @@ bot = commands.Bot(command_prefix=get_pre, description=description)
 async def on_ready():
     global FIRSTRUN
 
-    if FIRSTRUN = True:
+    if FIRSTRUN is True:
         print('Logged in as')
         print(bot.user.name)
         print(bot.user.id)
