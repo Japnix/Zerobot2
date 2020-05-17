@@ -10,11 +10,16 @@ import os
 import logging
 import yaml
 
+logging.basicConfig()
+LOGGER = logging.getLogger(__name__)
+LOGGER.setLevel(logging.INFO)
 
-discordtoken = sys.argv[1]
-stocktoken = sys.argv[2]
-embedcolor = 0xed330e
-settingsjson = os.path.dirname(__file__) + "/settings.json"
+
+FIRSTRUN = True
+DISCORDTOKEN = sys.argv[1]
+STOCKTOKEN = sys.argv[2]
+EMBEDCOLOR = 0xed330e
+SETTINGSJSON = os.path.dirname(__file__) + "/settings.json"
 description = '''Zerobot is a discord bot written by Japnix.  It's primary use is announcements.  But has some generic
 utility functions built in.'''
 
@@ -35,17 +40,26 @@ bot = commands.Bot(command_prefix=get_pre, description=description)
 
 @bot.event
 async def on_ready():
-    print('Logged in as')
-    print(bot.user.name)
-    print(bot.user.id)
-    print('Startup Time: ' + str(datetime.datetime.utcnow()))
-    print('Guilds Added: ' + str(len(bot.guilds)))
-    print('------')
+    global FIRSTRUN
 
-    if os.path.isfile(os.path.dirname(__file__) + "/settings.json"):
-        print('Loaded settings.json')
-        with open(os.path.dirname(__file__) + "/settings.json", 'r') as myfile:
-            myfile = json.loads(myfile.read())
+    if FIRSTRUN = True:
+        print('Logged in as')
+        print(bot.user.name)
+        print(bot.user.id)
+        print('Startup Time: ' + str(datetime.datetime.utcnow()))
+        print('Guilds Added: ' + str(len(bot.guilds)))
+        print('------')
+        FIRSTRUN = False
+    else:
+        print("Re-running on_ready, doing nothing" )
+
+    if os.path.isfile(SETTINGSJSON):
+        print('settings.json exist doing nothing.')
+        with open(SETTINGSJSON, 'r') as myfile:
+            try:
+                json.load(myfile)
+            except Exception as err:
+                LOGGER.info(err)
 
     else:
         print('Creating settings.json')
@@ -61,24 +75,24 @@ async def on_ready():
 @bot.event
 async def on_guild_join(ctx):
     logging.info('Guild ' + ctx.name + ' added ' + ctx.me.display_name + '.')
-    with open(settingsjson, 'r') as myfile:
+    with open(SETTINGSJSON, 'r') as myfile:
         myjson = json.load(myfile)
 
     myjson[str(ctx.id)] = {'prefix': '?', 'name': str(ctx.name)}
 
-    with open(settingsjson, 'w+') as myfile:
+    with open(SETTINGSJSON, 'w+') as myfile:
         json.dump(myjson, myfile)
 
 
 @bot.event
 async def on_guild_remove(ctx):
     logging.info('Guild ' + ctx.name + ' removed ' + ctx.me.display_name + '.')
-    with open(settingsjson, 'r') as myfile:
+    with open(SETTINGSJSON, 'r') as myfile:
         myjson = json.load(myfile)
 
     del myjson[str(ctx.id)]
 
-    with open(settingsjson, 'w+') as myfile:
+    with open(SETTINGSJSON, 'w+') as myfile:
         json.dump(myjson, myfile)
 
 
@@ -106,12 +120,12 @@ async def announcement(ctx, *, msg):
 
 @bot.command()
 async def stock(ctx, *, query):
-    request_url = 'https://cloud.iexapis.com/stable/tops/last?token=' + stocktoken\
+    request_url = 'https://cloud.iexapis.com/stable/tops/last?token=' + STOCKTOKEN\
                   + '&symbols=' + urllib.parse.quote(query)
 
     embed = discord.Embed(title='Stock Queries',
                           timestamp=datetime.datetime.utcnow(),
-                          color=embedcolor)
+                          color=EMBEDCOLOR)
 
     try:
         data = urllib.request.urlopen(request_url)
@@ -121,7 +135,7 @@ async def stock(ctx, *, query):
         if len(data) == 0:
             embed = discord.Embed(title="No Stock Matches",
                                   timestamp=datetime.datetime.utcnow(),
-                                  color=embedcolor)
+                                  color=EMBEDCOLOR)
 
         elif len(data) == 1:
             embed.add_field(name=data[0]['symbol'], value=data[0]['price'])
@@ -133,7 +147,7 @@ async def stock(ctx, *, query):
     except:
         embed = discord.Embed(title="Issue with stock API",
                               timestamp=datetime.datetime.utcnow(),
-                              color=embedcolor)
+                              color=EMBEDCOLOR)
 
     finally:
         await ctx.channel.send(embed=embed)
@@ -173,20 +187,20 @@ async def prefix(ctx, prefix):
         z!name WOL
     """
 
-    with open(settingsjson, 'r') as myfile:
+    with open(SETTINGSJSON, 'r') as myfile:
         myjson = json.load(myfile)
 
     if ctx.message.author.id == ctx.guild.owner.id or ctx.message.author.guild_permissions.administrator is True:
         logging.info(ctx.guild.name + ' (' + str(ctx.guild.id) + ') ' + 'changed prefix to ' + prefix)
         myjson[str(ctx.guild.id)]['prefix'] = prefix
-        embed = discord.Embed(title='Switched prefix to ' + str(prefix), color=embedcolor,
+        embed = discord.Embed(title='Switched prefix to ' + str(prefix), color=EMBEDCOLOR,
                               timestamp=datetime.datetime.utcnow())
 
-        with open(settingsjson, 'w+') as myfile:
+        with open(SETTINGSJSON, 'w+') as myfile:
             json.dump(myjson, myfile)
 
     else:
-        embed = discord.Embed(title='You are not the guild owner or administrator.', color=embedcolor,
+        embed = discord.Embed(title='You are not the guild owner or administrator.', color=EMBEDCOLOR,
                               timestamp=datetime.datetime.utcnow())
     await ctx.channel.send(embed=embed)
 
@@ -368,4 +382,4 @@ async def prettyplayers(ctx):
         await ctx.channel.send("```Players Role does not exist in this guild```")
 
 
-bot.run(discordtoken)
+bot.run(DISCORDTOKEN)
