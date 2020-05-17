@@ -10,17 +10,13 @@ import os
 import logging
 import yaml
 
-logging.basicConfig()
-LOGGER = logging.getLogger(__name__)
-LOGGER.setLevel(logging.INFO)
-
 
 FIRSTRUN = True
 DISCORDTOKEN = sys.argv[1]
 STOCKTOKEN = sys.argv[2]
 EMBEDCOLOR = 0xed330e
 SETTINGSJSON = os.path.dirname(__file__) + "/settings.json"
-description = '''Zerobot is a discord bot written by Japnix.  It's primary use is announcements.  But has some generic
+DESCRIPTION = '''Zerobot is a discord bot written by Japnix.  It's primary use is announcements.  But has some generic
 utility functions built in.'''
 
 # Enable logging
@@ -34,9 +30,7 @@ async def get_pre(bot, message):
 
     return myfile[str(message.guild.id)]['prefix']
 
-
-bot = commands.Bot(command_prefix=get_pre, description=description)
-
+bot = commands.Bot(command_prefix=get_pre, description=DESCRIPTION)
 
 @bot.event
 async def on_ready():
@@ -49,27 +43,28 @@ async def on_ready():
         print('Startup Time: ' + str(datetime.datetime.utcnow()))
         print('Guilds Added: ' + str(len(bot.guilds)))
         print('------')
+
+        if os.path.isfile(SETTINGSJSON):
+            print('settings.json exist doing nothing.')
+            with open(SETTINGSJSON, 'r') as myfile:
+                try:
+                    json.load(myfile)
+                except Exception as err:
+                    logging.info(err)
+
+        else:
+            print('Creating settings.json')
+            myfile = open(os.path.dirname(__file__) + '/settings.json', 'w+')
+            myjson = {}
+            for x in bot.guilds:
+                myjson[str(x.id)] = {'prefix': '?'}
+
+            json.dump(myjson, myfile)
+            myfile.close()
+
         FIRSTRUN = False
     else:
         print("Re-running on_ready, doing nothing" )
-
-    if os.path.isfile(SETTINGSJSON):
-        print('settings.json exist doing nothing.')
-        with open(SETTINGSJSON, 'r') as myfile:
-            try:
-                json.load(myfile)
-            except Exception as err:
-                LOGGER.info(err)
-
-    else:
-        print('Creating settings.json')
-        myfile = open(os.path.dirname(__file__) + '/settings.json', 'w+')
-        myjson = {}
-        for x in bot.guilds:
-            myjson[str(x.id)] = {'prefix': '?'}
-
-        json.dump(myjson, myfile)
-        myfile.close()
 
 
 @bot.event
@@ -205,13 +200,6 @@ async def prefix(ctx, prefix):
     await ctx.channel.send(embed=embed)
 
 
-#@bot.command()
-#async def newrole(ctx, role_name):
-#    role_color = discord.Colour(0x00FF00)
-#
-#    await ctx.guild.create_role(name=role_name, color=role_color)
-
-
 @bot.command()
 async def register(ctx):
     """This command assigns the message sender to the Players role to be used for online locals."""
@@ -228,7 +216,6 @@ async def register(ctx):
             await ctx.author.send(message)
 
         await ctx.message.author.add_roles(role)
-        #await ctx.channel.send(f"```{ctx.message.author.display_name} has registered```")
         await ctx.message.add_reaction('\U00002705')
 
 
@@ -244,7 +231,6 @@ async def paid(ctx):
 
     if role:
         await ctx.message.author.add_roles(role)
-        #await ctx.channel.send(f"```{ctx.message.author.display_name} has registered```")
         await ctx.message.add_reaction('\U00002705')
 
     else:
@@ -280,7 +266,6 @@ async def unregister(ctx):
 
     if role:
         await ctx.message.author.remove_roles(players_role)
-        #await ctx.channel.send(f"```{ctx.message.author.display_name} has unregistered```")
         await ctx.message.add_reaction('\U00002705')
 
     else:
@@ -289,33 +274,6 @@ async def unregister(ctx):
 
 @bot.command()
 async def players(ctx):
-    """This command lists all players currently registered for online locals"""
-
-    role = discord.utils.get(ctx.guild.roles, name='Players')
-    paid_role = discord.utils.get(ctx.guild.roles, name='Paid')
-
-    if role:
-        if role.members:
-            message = '```\n'
-            for x in role.members:
-                if paid_role in x.roles:
-                    message += x.display_name + ' - Paid\n'
-                else:
-                    message += x.display_name + '\n'
-
-            message += f'Total: {len(role.members)}```'
-
-        else:
-            message = '```Nobody has registered```'
-
-        await ctx.channel.send(message)
-
-    else:
-        await ctx.channel.send("```Players Role does not exist in this guild```")
-
-
-@bot.command()
-async def paidplayers(ctx):
     """Same as players command, however reads from YAML which contains discord id's for regular name printing"""
 
     with open(os.path.dirname(__file__) + '/players.yml', 'r') as f:
@@ -339,7 +297,6 @@ async def paidplayers(ctx):
                         message += players[x.id] + "\n"
                     else:
                         message += x.display_name + "\n"
-
 
             message += '```'
 
