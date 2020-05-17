@@ -11,6 +11,7 @@ import logging
 import yaml
 
 
+SETTINGS = {}
 FIRSTRUN = True
 DISCORDTOKEN = sys.argv[1]
 STOCKTOKEN = sys.argv[2]
@@ -25,16 +26,18 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s:%(levelname)s:%(name
 
 # Read in prefix from settings.json
 async def get_pre(bot, message):
-    with open(os.path.dirname(__file__) + "/settings.json", 'r') as x:
-        myfile = json.loads(x.read())
+    global SETTINGS
+    # with open(os.path.dirname(__file__) + "/settings.json", 'r') as x:
+    #     myfile = json.loads(x.read())
 
-    return myfile[str(message.guild.id)]['prefix']
+    return SETTINGS[str(message.guild.id)]['prefix']
 
 bot = commands.Bot(command_prefix=get_pre, description=DESCRIPTION)
 
 @bot.event
 async def on_ready():
     global FIRSTRUN
+    global SETTINGS
 
     if FIRSTRUN is True:
         print('Logged in as')
@@ -45,10 +48,10 @@ async def on_ready():
         print('------')
 
         if os.path.isfile(SETTINGSJSON):
-            print('settings.json exist doing nothing.')
+            print('Loading settings.json into memory')
             with open(SETTINGSJSON, 'r') as myfile:
                 try:
-                    json.load(myfile)
+                    SETTINGS = json.load(myfile)
                 except Exception as err:
                     logging.info(err)
 
@@ -69,26 +72,28 @@ async def on_ready():
 
 @bot.event
 async def on_guild_join(ctx):
+    global SETTINGS
     logging.info('Guild ' + ctx.name + ' added ' + ctx.me.display_name + '.')
-    with open(SETTINGSJSON, 'r') as myfile:
-        myjson = json.load(myfile)
+    # with open(SETTINGSJSON, 'r') as myfile:
+    #     myjson = json.load(myfile)
 
-    myjson[str(ctx.id)] = {'prefix': '?', 'name': str(ctx.name)}
+    SETTINGS[str(ctx.id)] = {'prefix': '?', 'name': str(ctx.name)}
 
     with open(SETTINGSJSON, 'w+') as myfile:
-        json.dump(myjson, myfile)
+        json.dump(SETTINGS, myfile)
 
 
 @bot.event
 async def on_guild_remove(ctx):
+    global SETTINGS
     logging.info('Guild ' + ctx.name + ' removed ' + ctx.me.display_name + '.')
-    with open(SETTINGSJSON, 'r') as myfile:
-        myjson = json.load(myfile)
+    # with open(SETTINGSJSON, 'r') as myfile:
+    #     myjson = json.load(myfile)
 
-    del myjson[str(ctx.id)]
+    del SETTINGS[str(ctx.id)]
 
     with open(SETTINGSJSON, 'w+') as myfile:
-        json.dump(myjson, myfile)
+        json.dump(SETTINGS, myfile)
 
 
 @bot.event
@@ -182,17 +187,19 @@ async def prefix(ctx, prefix):
         z!name WOL
     """
 
-    with open(SETTINGSJSON, 'r') as myfile:
-        myjson = json.load(myfile)
+    global SETTINGS
+
+    # with open(SETTINGSJSON, 'r') as myfile:
+    #     myjson = json.load(myfile)
 
     if ctx.message.author.id == ctx.guild.owner.id or ctx.message.author.guild_permissions.administrator is True:
         logging.info(ctx.guild.name + ' (' + str(ctx.guild.id) + ') ' + 'changed prefix to ' + prefix)
-        myjson[str(ctx.guild.id)]['prefix'] = prefix
+        SETTINGS[str(ctx.guild.id)]['prefix'] = prefix
         embed = discord.Embed(title='Switched prefix to ' + str(prefix), color=EMBEDCOLOR,
                               timestamp=datetime.datetime.utcnow())
 
         with open(SETTINGSJSON, 'w+') as myfile:
-            json.dump(myjson, myfile)
+            json.dump(SETTINGS, myfile)
 
     else:
         embed = discord.Embed(title='You are not the guild owner or administrator.', color=EMBEDCOLOR,
