@@ -272,7 +272,7 @@ async def unregister(ctx):
     role = discord.utils.get(ctx.guild.roles, name='Players')
 
     if role:
-        await ctx.message.author.remove_roles(players_role)
+        await ctx.message.author.remove_roles(role)
         await ctx.message.add_reaction('\U00002705')
 
     else:
