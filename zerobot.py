@@ -24,15 +24,15 @@ utility functions built in.'''
 logging.basicConfig(level=logging.INFO, format='%(asctime)s:%(levelname)s:%(name)s: %(message)s')
 
 
-# Read in prefix from settings.json
-async def get_pre(bot, message):
-    global SETTINGS
-    # with open(os.path.dirname(__file__) + "/settings.json", 'r') as x:
-    #     myfile = json.loads(x.read())
-
+# Return prefix based on SETTINGS dict which is in memory
+# TODO: Not sure why bot is required as an argument if it's
+#       not used in the function.
+def get_pre(bot, message):
     return SETTINGS[str(message.guild.id)]['prefix']
 
+
 bot = commands.Bot(command_prefix=get_pre, description=DESCRIPTION)
+
 
 @bot.event
 async def on_ready():
