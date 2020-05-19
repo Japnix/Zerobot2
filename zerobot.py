@@ -196,10 +196,14 @@ async def paid(ctx):
     """This command assigns the message sender to the Paid role to be used for online locals."""
 
     role = discord.utils.get(ctx.guild.roles, name='Paid')
+    players_role = discord.utils.get(ctx.guild.roles, name='Players')
 
     if role:
-        await ctx.message.author.add_roles(role)
-        await ctx.message.add_reaction('\U00002705')
+        if ctx.message.author in players_role.members:
+            await ctx.message.author.add_roles(role)
+            await ctx.message.add_reaction('\U00002705')
+        else:
+            await ctx.channel.send("```You have not registered yet```")
 
     else:
         await ctx.channel.send("```Paid Role does not exist in this guild```")
