@@ -9,16 +9,18 @@ import random
 import os
 import logging
 import yaml
+import pymongo
 
 
-SETTINGS = {}
-FIRSTRUN = True
+MONGODB = 'mongodb://127.0.0.1:27017'
 DISCORDTOKEN = sys.argv[1]
 STOCKTOKEN = sys.argv[2]
 EMBEDCOLOR = 0xed330e
-SETTINGSJSON = os.path.dirname(__file__) + "/settings.json"
 DESCRIPTION = '''Zerobot is a discord bot written by Japnix.  It's primary use is announcements.  But has some generic
 utility functions built in.'''
+
+MYCLIENT = pymongo.MongoClient(MONGODB)
+MYDB = MYCLIENT['ZerobotProd']
 
 # Enable logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s:%(levelname)s:%(name)s: %(message)s')
@@ -28,7 +30,11 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s:%(levelname)s:%(name
 # TODO: Not sure why bot is required as an argument if it's
 #       not used in the function.
 def get_pre(bot, message):
-    return SETTINGS[str(message.guild.id)]['prefix']
+    mycol = MYDB['settings']
+    dbq = mycol.find_one({'guildid': str(message.guild.id)})
+    prefix = dbq['prefix']
+
+    return prefix
 
 
 bot = commands.Bot(command_prefix=get_pre, description=DESCRIPTION)
@@ -36,64 +42,23 @@ bot = commands.Bot(command_prefix=get_pre, description=DESCRIPTION)
 
 @bot.event
 async def on_ready():
-    global FIRSTRUN
-    global SETTINGS
-
-    if FIRSTRUN is True:
-        print('Logged in as')
-        print(bot.user.name)
-        print(bot.user.id)
-        print('Startup Time: ' + str(datetime.datetime.utcnow()))
-        print('Guilds Added: ' + str(len(bot.guilds)))
-        print('------')
-
-        if os.path.isfile(SETTINGSJSON):
-            print('Loading settings.json into memory')
-            with open(SETTINGSJSON, 'r') as myfile:
-                try:
-                    SETTINGS = json.load(myfile)
-                except Exception as err:
-                    logging.info(err)
-
-        else:
-            print('Creating settings.json')
-            myfile = open(os.path.dirname(__file__) + '/settings.json', 'w+')
-            myjson = {}
-            for x in bot.guilds:
-                myjson[str(x.id)] = {'prefix': '?'}
-
-            json.dump(myjson, myfile)
-            myfile.close()
-
-        FIRSTRUN = False
-    else:
-        print("Re-running on_ready, doing nothing" )
+    print('Logged in as')
+    print(bot.user.name)
+    print(bot.user.id)
+    print('Startup Time: ' + str(datetime.datetime.utcnow()))
+    print('Guilds Added: ' + str(len(bot.guilds)))
+    print('------')
 
 
 @bot.event
 async def on_guild_join(ctx):
-    global SETTINGS
-    logging.info('Guild ' + ctx.name + ' added ' + ctx.me.display_name + '.')
-    # with open(SETTINGSJSON, 'r') as myfile:
-    #     myjson = json.load(myfile)
-
-    SETTINGS[str(ctx.id)] = {'prefix': '?', 'name': str(ctx.name)}
-
-    with open(SETTINGSJSON, 'w+') as myfile:
-        json.dump(SETTINGS, myfile)
-
+    mycol = MYDB['settings']
+    mycol.find_one_and_update({'guildid': str(ctx.id)}, {'$set': {'guildid': str(ctx.id), 'prefix': '?'}}, upsert=True)
 
 @bot.event
 async def on_guild_remove(ctx):
-    global SETTINGS
-    logging.info('Guild ' + ctx.name + ' removed ' + ctx.me.display_name + '.')
-    # with open(SETTINGSJSON, 'r') as myfile:
-    #     myjson = json.load(myfile)
-
-    del SETTINGS[str(ctx.id)]
-
-    with open(SETTINGSJSON, 'w+') as myfile:
-        json.dump(SETTINGS, myfile)
+    mycol = MYDB['settings']
+    mycol.delete_one({'guildid': str(ctx.id)})
 
 
 @bot.event
@@ -186,20 +151,15 @@ async def prefix(ctx, prefix):
         Then...
         z!name WOL
     """
-
-    global SETTINGS
-
-    # with open(SETTINGSJSON, 'r') as myfile:
-    #     myjson = json.load(myfile)
+    mycol = MYDB['settings']
 
     if ctx.message.author.id == ctx.guild.owner.id or ctx.message.author.guild_permissions.administrator is True:
         logging.info(ctx.guild.name + ' (' + str(ctx.guild.id) + ') ' + 'changed prefix to ' + prefix)
-        SETTINGS[str(ctx.guild.id)]['prefix'] = prefix
+
+        mycol.find_one_and_update({'guildid': str(ctx.guild.id)}, {'$set': {'prefix': prefix}})
+
         embed = discord.Embed(title='Switched prefix to ' + str(prefix), color=EMBEDCOLOR,
                               timestamp=datetime.datetime.utcnow())
-
-        with open(SETTINGSJSON, 'w+') as myfile:
-            json.dump(SETTINGS, myfile)
 
     else:
         embed = discord.Embed(title='You are not the guild owner or administrator.', color=EMBEDCOLOR,
