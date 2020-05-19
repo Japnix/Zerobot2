@@ -6,9 +6,7 @@ import json
 import datetime
 import sys
 import random
-import os
 import logging
-import yaml
 import pymongo
 
 
@@ -16,7 +14,7 @@ MONGODB = 'mongodb://127.0.0.1:27017'
 DISCORDTOKEN = sys.argv[1]
 STOCKTOKEN = sys.argv[2]
 EMBEDCOLOR = 0xed330e
-DESCRIPTION = '''Zerobot is a discord bot written by Japnix.  It's primary use is announcements.  But has some generic
+DESCRIPTION = '''Zerobot is a discord bot written by Japnix.  Its primary use is announcements.  But has some generic
 utility functions built in.'''
 
 MYCLIENT = pymongo.MongoClient(MONGODB)
