@@ -55,6 +55,7 @@ async def on_guild_join(ctx):
     mycol = MYDB['settings']
     mycol.find_one_and_update({'guildid': str(ctx.id)}, {'$set': {'guildid': str(ctx.id), 'prefix': '?'}}, upsert=True)
 
+
 @bot.event
 async def on_guild_remove(ctx):
     mycol = MYDB['settings']
@@ -243,8 +244,12 @@ async def unregister(ctx):
 async def players(ctx):
     """Same as players command, however reads from YAML which contains discord id's for regular name printing"""
 
-    with open(os.path.dirname(__file__) + '/players.yml', 'r') as f:
-        players = yaml.safe_load(f)
+    mycol = MYDB['users']
+    dbq = mycol.find()
+
+    players = {}
+    for user in dbq:
+        players['userid'] = user['name']
 
     role = discord.utils.get(ctx.guild.roles, name='Players')
     paid_role = discord.utils.get(ctx.guild.roles, name='Paid')
@@ -280,8 +285,12 @@ async def players(ctx):
 async def prettyplayers(ctx):
     """Same as players command, however reads from YAML which contains discord id's for regular name printing"""
 
-    with open(os.path.dirname(__file__) + '/players.yml', 'r') as f:
-        players = yaml.safe_load(f)
+    mycol = MYDB['users']
+    dbq = mycol.find()
+
+    players = {}
+    for user in dbq:
+        players['userid'] = user['name']
 
     role = discord.utils.get(ctx.guild.roles, name='Players')
 
