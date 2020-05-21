@@ -248,10 +248,11 @@ async def players(ctx):
 
     mycol = MYDB['users']
     dbq = mycol.find()
-
+    
     players = {}
     for user in dbq:
-        players['userid'] = user['name']
+        userid = user['userid']
+        players[userid] = user['name']
 
     role = discord.utils.get(ctx.guild.roles, name='Players')
     paid_role = discord.utils.get(ctx.guild.roles, name='Paid')
@@ -261,14 +262,14 @@ async def players(ctx):
             message = '```\n'
             for x in role.members:
                 if paid_role in x.roles:
-                    if x.id in players.keys():
-                        message += players[x.id] + " - Paid\n"
+                    if str(x.id) in players.keys():
+                        message += players[str(x.id)] + " - Paid\n"
                     else:
                         message += x.display_name + " - Paid\n"
 
                 else:
-                    if x.id in players.keys():
-                        message += players[x.id] + "\n"
+                    if str(x.id) in players.keys():
+                        message += players[str(x.id)] + "\n"
                     else:
                         message += x.display_name + "\n"
 
@@ -292,7 +293,8 @@ async def prettyplayers(ctx):
 
     players = {}
     for user in dbq:
-        players['userid'] = user['name']
+        userid = user['userid']
+        players[userid] = user['name']
 
     role = discord.utils.get(ctx.guild.roles, name='Players')
 
@@ -301,8 +303,8 @@ async def prettyplayers(ctx):
     if role:
         if role.members:
             for x in role.members:
-                if x.id in players.keys():
-                    message += players[x.id] + "\n"
+                if str(x.id) in players.keys():
+                    message += players[str(x.id)] + "\n"
                 else:
                     message += x.display_name + "\n"
 
