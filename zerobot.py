@@ -29,7 +29,7 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s:%(levelname)s:%(name
 #       not used in the function.
 def get_pre(bot, message):
     mycol = MYDB['settings']
-    dbq = mycol.find_one({'guildid': str(message.guild.id)})
+    dbq = mycol.find_one({'guildid': message.guild.id})
     prefix = dbq['prefix']
 
     return prefix
@@ -47,17 +47,46 @@ async def on_ready():
     print('Guilds Added: ' + str(len(bot.guilds)))
     print('------')
 
+    mycol = MYDB['settings']
+    dbq = mycol.find()
+
+    dbguilds = [doc['guildid'] for doc in dbq]
+    botguilds = [guild.id for guild in bot.guilds]
+
+
+    # If when we start the bot there are more guilds in settings.json then the bot see's as joined
+    # we remove those bots from settings.json
+    if len(dbguilds) > len(botguilds):
+        for guildid in dbguilds:
+            if guildid not in botguilds:
+                dbq = mycol.find_one({"guildid": guildid})
+                logging.info(f"Guild {dbq['name']} ({guildid}) was removed while the bot was offline.  Removing from db.")
+                mycol.delete_one({'guildid': guildid})
+
+    # Else if the bot see's more guilds than what is present in settings.json we add the missing guilds with default
+    # settings
+    elif len(dbguilds) < len(botguilds):
+        for guildid in botguilds:
+            if guildid not in dbguilds:
+                guild2add = bot.get_guild(guildid)
+                logging.info(f"Guild {guild2add.name} ({guild2add.id}) was added while the bot was offline.  Adding to db.")
+                mycol.find_one_and_update({'guildid': guild2add.id},
+                                          {'$set': {'guildid': guild2add.id, 'prefix': '?', 'name': guild2add.name}},
+                                          upsert=True)
+
 
 @bot.event
 async def on_guild_join(ctx):
     mycol = MYDB['settings']
-    mycol.find_one_and_update({'guildid': str(ctx.id)}, {'$set': {'guildid': str(ctx.id), 'prefix': '?'}}, upsert=True)
+    mycol.find_one_and_update({'guildid': ctx.id},
+                              {'$set': {'guildid': ctx.id, 'prefix': '?', 'name': ctx.name}},
+                              upsert=True)
 
 
 @bot.event
 async def on_guild_remove(ctx):
     mycol = MYDB['settings']
-    mycol.delete_one({'guildid': str(ctx.id)})
+    mycol.delete_one({'guildid': ctx.id})
 
 
 @bot.event
