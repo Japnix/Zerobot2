@@ -8,11 +8,20 @@ import sys
 import random
 import logging
 import pymongo
+import argparse
 
 
-MONGODB = 'mongodb://127.0.0.1:27017'
-DISCORDTOKEN = sys.argv[1]
-STOCKTOKEN = sys.argv[2]
+# Create argparse parser
+parser = argparse.ArgumentParser(description='Run a Zerobot"')
+parser.add_argument('-d', '--db', type=str ,help='mongob:// url with port', required=True)
+parser.add_argument('-t', '--token', type=str, help='Discord bot token that will be used', required=True)
+parser.add_argument('-s', '--stock', type=str, help='Stock API Key', required=True)
+args = parser.parse_args()
+
+
+MONGODB = args.db
+DISCORDTOKEN = args.token
+STOCKTOKEN = args.stock
 EMBEDCOLOR = 0xed330e
 DESCRIPTION = '''Zerobot is a discord bot written by Japnix.  Its primary use is announcements.  But has some generic
 utility functions built in.'''
@@ -22,7 +31,6 @@ MYDB = MYCLIENT['ZerobotProd']
 
 # Enable logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s:%(levelname)s:%(name)s: %(message)s')
-
 
 # Return prefix based on SETTINGS dict which is in memory
 # TODO: Not sure why bot is required as an argument if it's
