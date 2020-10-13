@@ -189,7 +189,7 @@ async def prefix(ctx, prefix):
     """
     mycol = MYDB['settings']
 
-    if ctx.message.author.id == ctx.guild.owner.id or ctx.message.author.guild_permissions.administrator is True:
+    if ctx.message.author.id == ctx.guild.owner_id or ctx.message.author.guild_permissions.administrator is True:
         logging.info(ctx.guild.name + ' (' + str(ctx.guild.id) + ') ' + 'changed prefix to ' + prefix)
 
         mycol.find_one_and_update({'guildid': ctx.guild.id}, {'$set': {'prefix': prefix}})
