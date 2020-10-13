@@ -192,7 +192,7 @@ async def prefix(ctx, prefix):
     if ctx.message.author.id == ctx.guild.owner.id or ctx.message.author.guild_permissions.administrator is True:
         logging.info(ctx.guild.name + ' (' + str(ctx.guild.id) + ') ' + 'changed prefix to ' + prefix)
 
-        mycol.find_one_and_update({'guildid': str(ctx.guild.id)}, {'$set': {'prefix': prefix}})
+        mycol.find_one_and_update({'guildid': ctx.guild.id}, {'$set': {'prefix': prefix}})
 
         embed = discord.Embed(title='Switched prefix to ' + str(prefix), color=EMBEDCOLOR,
                               timestamp=datetime.datetime.utcnow())
