@@ -130,31 +130,45 @@ async def stock(ctx, *, query):
         content = data.read().decode('utf-8')
         data = json.loads(content)
 
-        if len(data) == 0:
-            embed = discord.Embed(title="No Stock Matches",
-                                  timestamp=datetime.datetime.utcnow(),
-                                  color=EMBEDCOLOR)
+        if data['isUSMarketOpen'] is True:
+            open_market = "Open"
+        elif data['isUSMarketOpen'] is False:
+            open_market = "Closed"
 
+        symbol = data['symbol']
+        company_name = data ['companyName']
+        embed_title = f"{company_name} ({symbol} - {open_market})"
+
+        previous_close = data['previousClose']
+        latest_price = data['latestPrice']
+        change_percentage = f"{data['changePercent'] * 100}%"
+
+        if data['changePercent'] < 0:
+            stock_color = 0xed330e
         else:
-            symbol = data['symbol']
-            company_name = data ['companyName']
-            previous_close = data['previousClose']
-            latest_price = data['latestPrice']
-            change_percentage = f"{data['changePercent'] * 100}%"
-            embed_title = f"{company_name} ({symbol})"
+            stock_color = 0x33ff5b
 
-            embed = discord.Embed(title=embed_title,
+        embed = discord.Embed(title=embed_title,
+                              timestamp=datetime.datetime.utcnow(),
+                              color=stock_color)
+
+        if open_market is True:
+            embed.add_field(name="Latest Price (Open)", value=latest_price)
+            embed.add_field(name="Change Percent (Open)", value=change_percentage)
+            embed.add_field(name="Previous Close", value=previous_close)
+        else:
+            embed.add_field(name="Previous Close", value=previous_close)
+            embed.add_field(name="Change Percent", value=change_percentage)
+
+    except urllib.error.HTTPError as err:
+        if err.code == 404:
+            embed = discord.Embed(title="Stock Not Found",
                                   timestamp=datetime.datetime.utcnow(),
                                   color=EMBEDCOLOR)
-
-            embed.add_field(name="Latest Price", value=latest_price)
-            embed.add_field(name="Change Percent", value=change_percentage)
-            embed.add_field(name="Previous Close", value= previous_close)
-
-    except:
-        embed = discord.Embed(title="Issue with stock API",
-                              timestamp=datetime.datetime.utcnow(),
-                              color=EMBEDCOLOR)
+        else:
+            embed = discord.Embed(title="Issue with IEX API",
+                                  timestamp=datetime.datetime.utcnow(),
+                                  color=EMBEDCOLOR)
 
     finally:
         await ctx.channel.send(embed=embed)
