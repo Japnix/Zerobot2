@@ -153,12 +153,13 @@ async def stock(ctx, *, query):
                               color=stock_color)
 
         if open_market is True:
-            embed.add_field(name="Latest Price (Open)", value=latest_price)
-            embed.add_field(name="Change Percent (Open)", value=change_percentage)
+            embed.add_field(name="Latest Price", value=latest_price)
+            embed.add_field(name="Change Percent", value=change_percentage)
             embed.add_field(name="Previous Close", value=previous_close)
         else:
-            embed.add_field(name="Previous Close", value=previous_close)
+            embed.add_field(name="Close Price", value=latest_price)
             embed.add_field(name="Change Percent", value=change_percentage)
+            embed.add_field(name="Previous Close", value=previous_close)
 
     except urllib.error.HTTPError as err:
         if err.code == 404:
