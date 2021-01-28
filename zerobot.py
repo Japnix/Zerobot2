@@ -121,12 +121,9 @@ async def announcement(ctx, *, msg):
 
 @bot.command()
 async def stock(ctx, *, query):
-    request_url = 'https://cloud.iexapis.com/stable/tops/last?token=' + STOCKTOKEN\
-                  + '&symbols=' + urllib.parse.quote(query)
 
-    embed = discord.Embed(title='Stock Queries',
-                          timestamp=datetime.datetime.utcnow(),
-                          color=EMBEDCOLOR)
+    request_url = 'https://cloud.iexapis.com/stable/stock/' + urllib.parse.quote(query) + '/quote?token=' \
+                    + STOCKTOKEN
 
     try:
         data = urllib.request.urlopen(request_url)
@@ -138,12 +135,21 @@ async def stock(ctx, *, query):
                                   timestamp=datetime.datetime.utcnow(),
                                   color=EMBEDCOLOR)
 
-        elif len(data) == 1:
-            embed.add_field(name=data[0]['symbol'], value=data[0]['price'])
-
         else:
-            for tickers in data:
-                embed.add_field(name=tickers['symbol'], value=tickers['price'])
+            symbol = data['symbol']
+            company_name = data ['companyName']
+            previous_close = data['previousClose']
+            latest_price = data['latestPrice']
+            change_percentage = f"{data['changePercent'] * 100}%"
+            embed_title = f"{company_name} ({symbol})"
+
+            embed = discord.Embed(title=embed_title,
+                                  timestamp=datetime.datetime.utcnow(),
+                                  color=EMBEDCOLOR)
+
+            embed.add_field(name="Latest Price", value=latest_price)
+            embed.add_field(name="Change Percent", value=change_percentage)
+            embed.add_field(name="Previous Close", value= previous_close)
 
     except:
         embed = discord.Embed(title="Issue with stock API",
