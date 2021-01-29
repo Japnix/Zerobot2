@@ -152,7 +152,7 @@ async def stock(ctx, *, query):
                               timestamp=datetime.datetime.utcnow(),
                               color=stock_color)
 
-        if open_market is True:
+        if open_market == "Open":
             embed.add_field(name="Latest Price", value=latest_price)
             embed.add_field(name="Change Percent", value=change_percentage)
             embed.add_field(name="Previous Close", value=previous_close)
